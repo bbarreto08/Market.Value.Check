@@ -7,8 +7,9 @@ var builder = Host.CreateApplicationBuilder(args);
 // Carrega as configurações do arquivo appsettings.json
 var configuration = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddJsonFile("appsettings.json")
     .AddUserSecrets<Program>()
+    .AddEnvironmentVariables()
     .Build();
 
 // Adiciona a configuração ao serviço de injeção de dependência

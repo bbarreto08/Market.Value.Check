@@ -24,23 +24,19 @@ namespace Worker.Market.Value.Check
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                SentMessage("string title", "string message");
-
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
-                    _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-
-                    //await Run();
+                    _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);                    
                 }
-                await Task.Delay(1000, stoppingToken);
+
+                await Run();
+
+                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
             }
         }
 
         public async Task Run()
         {
-            var t = _configuration["pushover-token"];
-            SentMessage("string title", "string message");
-
             var currentBtc = await GetBtc();
             var initialValue = await _marketValueHistoryRepository.GetInitialValue(2);
 
@@ -62,6 +58,12 @@ namespace Worker.Market.Value.Check
                 });
 
                 await Task.WhenAll(insertValue, insertHistory);
+            }
+
+            if(initialValue == null)
+            {
+                SentMessage("Cotação BTC", $"Valor: {currentBtc?.market_data.current_price.GetBrl()}");
+                return;
             }
 
             var diff = currentBtc.market_data.current_price.brl - initialValue.Value;
